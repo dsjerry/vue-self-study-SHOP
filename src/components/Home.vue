@@ -15,7 +15,7 @@
       <!-- 动态绑定背景的width宽度 -->
       <el-aside :width="isCollapse ? '64px' : '200px' ">
         <!-- <div class="toogle-button" @click="toggleCollapse">=</div> -->
-        <!-- unique-opened另外的绑定方法：   :unique-opened='true' -->
+        <!-- unique-opened另外的绑定方法：   :unique-opened='true' ,就是说要设置布尔值，要么加冒号，要么去等号-->
         <el-menu
           background-color="#333744"
           text-color="#fff"
@@ -23,6 +23,8 @@
           unique-opened
           :collapse="isCollapse"
           :collapse-transition="false"
+          :router="true"
+          :default-active="activePath"
         >
           <!-- 一级菜单 -->
           <!-- 这里动态绑定一个index，指定模板，同时index必须接受字符串，所以要加个空字符串 -->
@@ -35,10 +37,15 @@
               <!-- 文本 -->
               <span>{{item.authName}}</span>
             </template>
+            <!-- 二级菜单 -->
+            <!-- :index="subItem.id + ' '" -->
+            <!-- 通过检查元素，发现path可以用作指定路由，但路由要有  / 所以加上 -->
+            <!-- 绑定点击事件 saveNavState，将值传过去 -->
             <el-menu-item
-              :index="subItem.id + ' '"
+              :index=" '/'+ subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="saveNavState( '/' + subItem.path )"
             >
               <template slot="title">
                 <!-- 图标 -->
@@ -57,7 +64,9 @@
         />
       </el-aside>
       <!-- 右侧 -->
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -76,11 +85,14 @@ export default {
         145: 'iconfont icon-baobiao'
       },
       // 是否折叠的布尔值
-      isCollapse: false
+      isCollapse: false,
+      activePath: ''
     }
   },
-  created: function() {
+  created() {
+    // 这里每一条之间不用加逗号
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     logout: function() {
@@ -98,6 +110,12 @@ export default {
     },
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
+    },
+    // 通过sessionStorage 保存点击后的激活状态，刷新后也不会消失
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
+      // 这里要重新赋值，虽然是存起来，并实现了生命周期函数created的赋值，但是也要给每个绑定的事件赋值
     }
   }
 }
