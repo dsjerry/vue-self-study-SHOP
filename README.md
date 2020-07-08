@@ -1,4 +1,4 @@
-# vue_shop
+# vue_shop，黑马程序员项目实战
 
 ## Project setup
 ```
